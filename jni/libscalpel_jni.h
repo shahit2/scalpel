@@ -15,6 +15,30 @@ extern "C" {
 JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat
   (JNIEnv *, jclass, jstring, jobject, jstring, jstring);
 
+/*
+ * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver
+ * Method:    initialize
+ * Signature: (Ljava/lang/String;Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_initialize
+  (JNIEnv *, jclass, jstring, jstring);
+
+/*
+ * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver
+ * Method:    carve
+ * Signature: (Ljava/lang/String;Lorg/sleuthkit/datamodel/ReadContentInputStream;J)V
+ */
+JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carve
+  (JNIEnv *, jclass, jstring, jobject, jlong);
+
+/*
+ * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver
+ * Method:    finalize
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_finalize
+  (JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 }
 #endif

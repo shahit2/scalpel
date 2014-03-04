@@ -282,15 +282,19 @@ int processSearchSpecLine(struct scalpelState *state, char *buffer,
 	return SCALPEL_OK;
 }
 
+
 // process configuration file
 int readSearchSpecFile(struct scalpelState *state) {
 
 	int lineNumber = 0, status;
 	FILE *f;
 
-	char *buffer = (char *) malloc(
-			(NUM_SEARCH_SPEC_ELEMENTS * MAX_STRING_LENGTH + 1) * sizeof(char));
+	char *buffer = (char *) malloc((NUM_SEARCH_SPEC_ELEMENTS * MAX_STRING_LENGTH + 1) * sizeof(char));
 	checkMemoryAllocation(state, buffer, __LINE__, __FILE__, "buffer");
+	if (state->conffile == NULL)
+	{
+		return SCALPEL_ERROR_TOO_MANY_TYPES;
+	}
 
 	f = fopen(state->conffile, "r");
 	if (f == NULL ) {
@@ -302,26 +306,27 @@ int readSearchSpecFile(struct scalpelState *state) {
 		return SCALPEL_ERROR_FATAL_READ;
 	}
 
-	while (fgets(buffer, NUM_SEARCH_SPEC_ELEMENTS * MAX_STRING_LENGTH, f)) {
+	while (fgets(buffer, NUM_SEARCH_SPEC_ELEMENTS * MAX_STRING_LENGTH, f)) 
+	{
 		lineNumber++;
 
-		if (state->specLines > MAX_FILE_TYPES) {
+		
+		if (state->specLines > MAX_FILE_TYPES) 
+		{
 			fprintf(stderr, "Your conf file contains too many file types.\n");
-			fprintf(stderr,
-					"This version was compiled with MAX_FILE_TYPES == %d.\n",
-					MAX_FILE_TYPES);
+			fprintf(stderr,"This version was compiled with MAX_FILE_TYPES == %d.\n",MAX_FILE_TYPES);
 			fprintf(stderr,"Increase MAX_FILE_TYPES, recompile, and try again.\n");
-      free(buffer);
-      buffer = NULL;
-      return SCALPEL_ERROR_TOO_MANY_TYPES;
-    }
+		    free(buffer);
+		    buffer = NULL;
+  		    return SCALPEL_ERROR_TOO_MANY_TYPES;
+		}
 
-		if ((status = processSearchSpecLine(state, buffer, lineNumber))
-				!= SCALPEL_OK) {
+		if ((status = processSearchSpecLine(state, buffer, lineNumber))!= SCALPEL_OK) {
 			free(buffer);
 			buffer = NULL;
 			return status;
 		}
+		
 	}
 
 	// add an empty object to the end of the list as a marker
@@ -335,10 +340,10 @@ int readSearchSpecFile(struct scalpelState *state) {
 	state->SearchSpec[state->specLines].endlength = 0;
 
 	// GGRIII: offsets field is uninitialized--it doesn't
-	// matter, since we won't use this entry.
-
+	// matter, since we won't use this entry.		
 	fclose(f);
 	free(buffer);
+
 	buffer = NULL;
 	return SCALPEL_OK;
 }
@@ -534,11 +539,11 @@ void convertFileNames(struct scalpelState *state) {
 	} else {
 		//		perror("realpath");
 	}
-
 }
 
+
 int libscalpel_initialize(scalpelState ** state, char * confFilePath, 
-                          char * outDir, const scalpelState & options)
+                          char * outDir, const scalpelState & options) throw (std::runtime_error)
 {
     std::string funcname("libscalpel_initialize");
     
@@ -573,27 +578,35 @@ int libscalpel_initialize(scalpelState ** state, char * confFilePath,
     convertFileNames(pState);
 
     int err = 0;
-    
-    // prepare audit file and make sure output directory is empty.
-    if ((err = openAuditFile(pState))) {
-        handleError(pState, err); //can throw
-        std::stringstream ss;
-        ss << ": Error opening audit file, error code: " << err;
-        throw std::runtime_error(funcname + ss.str());
-    }
-
+   /*
+   hFile = fopen ("C:\\scalpel111\\scalpel_debug.txt", "w");
+   if (hFile == NULL) {
+		printf ("Error opening log file\n");
+	}
+*/
+   
     // read configuration file
-    if ((err = readSearchSpecFile(pState))) {
+	err = readSearchSpecFile(pState);
+    if (err != SCALPEL_OK) {
+
         // problem with config file
         handleError(pState, err); //can throw
         std::stringstream ss;
         ss << ": Error reading spec file, error code: " << err;
         throw std::runtime_error(funcname + ss.str());
     }
-
+	
+      // prepare audit file and make sure output directory is empty.
+    if ((err = openAuditFile(pState))) {
+        handleError(pState, err); //can throw
+        std::stringstream ss;
+        ss << ": Error opening audit file, error code: " << err;
+        throw std::runtime_error(funcname + ss.str());
+    }
+	
+	
     // Initialize the backing store of buffer to read-in, process image data.
     init_store();
-
     // Initialize threading model for cpu or gpu search.
     init_threading_model(pState);
 
@@ -602,7 +615,7 @@ int libscalpel_initialize(scalpelState ** state, char * confFilePath,
     return SCALPEL_OK;
 }
 
-int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const reader)
+int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const reader)throw (std::runtime_error)
 {
     std::string funcname("libscalpel_carve_input");
     
@@ -642,7 +655,7 @@ int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const read
     return SCALPEL_OK;
 }
 
-int libscalpel_finalize(scalpelState ** state)
+int libscalpel_finalize(scalpelState ** state)throw (std::runtime_error)
 {
     std::string funcname("libscalpel_finalize");
     

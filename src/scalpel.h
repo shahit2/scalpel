@@ -348,9 +348,9 @@ typedef struct Fragment {
 
 // Interface for using scalpel as a library
 extern int libscalpel_initialize(scalpelState ** state, char * confFilePath, 
-                                 char * outDir, const scalpelState& options);
-extern int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const reader);
-extern int libscalpel_finalize(scalpelState ** state);
+                                 char * outDir, const scalpelState& options) throw (std::runtime_error);
+extern int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const reader) throw (std::runtime_error);
+extern int libscalpel_finalize(scalpelState ** state) throw (std::runtime_error);
 
 // prototypes for visible scalpel.c functions
 void freeState(struct scalpelState *state);

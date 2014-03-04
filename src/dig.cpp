@@ -560,6 +560,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
   //  gettimeofday(&srchthen, 0);
   if(state->modeVerbose) {
     printf("Waking up threads for header searches.\n");
+    fflush(stdout);
   }
   for(needlenum = 0; needlenum < state->specLines; needlenum++) {
     currentneedle = &(state->SearchSpec[needlenum]);
@@ -595,6 +596,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
 
   if(state->modeVerbose) {
     printf("Waiting for thread group synchronization.\n");
+     fflush(stdout);
   }
 
   // wait for all threads to complete header search before proceeding
@@ -607,6 +609,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
 
   if(state->modeVerbose) {
     printf("Thread group synchronization complete.\n");
+     fflush(stdout);
   }
 
   // digest header locations discovered by the thread group
@@ -682,6 +685,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
 
   if(state->modeVerbose) {
     printf("Waking up threads for footer searches.\n");
+    fflush(stdout);
   }
 
   for(needlenum = 0; needlenum < state->specLines; needlenum++) {
@@ -732,6 +736,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
 
   if(state->modeVerbose) {
     printf("Waiting for thread group synchronization.\n");
+     fflush(stdout);
   }
 
   // ---------- thread group synchronization point ----------- //
@@ -747,6 +752,7 @@ digBuffer(struct scalpelState *state, unsigned long long lengthofbuf,
 
   if(state->modeVerbose) {
     printf("Thread group synchronization complete.\n");
+     fflush(stdout);
   }
 
   // digest footer locations discovered by the thread group
@@ -936,7 +942,7 @@ void *gpu_handler(void *sss) {
   int longestneedle = findLongestNeedle(state->SearchSpec);
   gpu_init(longestneedle);
   printf("Initializing GPU buffers complete.\n");
-
+  fflush(stdout);
   // Now we get buffers from the full_readbuf queue, send them to the GPU for
   // seach, wait till GPU finishes, and put the results buffers into the
   // results_readbuf queue.
@@ -1548,7 +1554,7 @@ int carveImageFile(struct scalpelState *state) {
 
 
   }
-
+   fflush(stdout);
   if(state->previewMode) {
     fprintf(stdout, "** PREVIEW MODE: GENERATING AUDIT LOG ONLY **\n");
     fprintf(stdout, "** NO CARVED FILES WILL BE WRITTEN **\n");
@@ -1774,7 +1780,7 @@ int carveImageFile(struct scalpelState *state) {
   destroyCoverageMaps(state);
 
   printf("Processing of image file complete. Cleaning up...\n");
-
+     fflush(stdout);
   // tear down header/footer databases
 
   for(needlenum = 0; needlenum < state->specLines; needlenum++) {
@@ -1809,6 +1815,7 @@ int carveImageFile(struct scalpelState *state) {
   carvelists = NULL;
 
   printf("Done.");
+   fflush(stdout);
   return SCALPEL_OK;
 }
 
@@ -2519,6 +2526,7 @@ static void *threadedFindAll(void *args) {
 
     if(state->modeVerbose) {
       printf("needle search thread # %d awake.\n", id);
+       fflush(stdout);
     }
 
     while (startpos) {
@@ -2566,6 +2574,7 @@ static void *threadedFindAll(void *args) {
 
     if(state->modeVerbose) {
       printf("needle search thread # %d asleep.\n", id);
+      fflush(stdout);
     }
 
     // signal completion of work
@@ -2669,6 +2678,7 @@ int init_threading_model(struct scalpelState *state) {
 #ifdef GPU_THREADING
 
   printf("GPU-based threading model enabled.\n");
+  fflush(stdout);
 
 #endif
 
@@ -2676,35 +2686,27 @@ int init_threading_model(struct scalpelState *state) {
 
   printf("Multi-core CPU threading model enabled.\n");
   printf("Initializing thread group data structures.\n");
-
+  fflush(stdout);
   // initialize global data structures for threads
   searchthreads = (pthread_t *) malloc(state->specLines * sizeof(pthread_t));
-  checkMemoryAllocation(state, searchthreads, __LINE__, __FILE__,
-			"searchthreads");
-  threadargs =
-    (ThreadFindAllParams *) malloc(state->specLines *
-				   sizeof(ThreadFindAllParams));
+  checkMemoryAllocation(state, searchthreads, __LINE__, __FILE__,"searchthreads");
+  threadargs =(ThreadFindAllParams *) malloc(state->specLines * sizeof(ThreadFindAllParams));
   checkMemoryAllocation(state, threadargs, __LINE__, __FILE__, "args");
   foundat = (char ***)malloc(state->specLines * sizeof(char *));
   checkMemoryAllocation(state, foundat, __LINE__, __FILE__, "foundat");
   foundatlens = (size_t **) malloc(state->specLines * sizeof(size_t));
   checkMemoryAllocation(state, foundatlens, __LINE__, __FILE__, "foundatlens");
   workavailable = (pthread_mutex_t *)malloc(state->specLines * sizeof(pthread_mutex_t));
-
-  checkMemoryAllocation(state, workavailable, __LINE__, __FILE__,
-			"workavailable");
+  checkMemoryAllocation(state, workavailable, __LINE__, __FILE__,"workavailable");
   workcomplete = (pthread_mutex_t *)malloc(state->specLines * sizeof(pthread_mutex_t));
-
-  checkMemoryAllocation(state, workcomplete, __LINE__, __FILE__,
-			"workcomplete");
-
+  checkMemoryAllocation(state, workcomplete, __LINE__, __FILE__,"workcomplete");
   printf("Creating threads...\n");
+   fflush(stdout);
   for(i = 0; i < state->specLines; i++) {
     foundat[i] = (char **)malloc((MAX_MATCHES_PER_BUFFER + 1) * sizeof(char *));
     checkMemoryAllocation(state, foundat[i], __LINE__, __FILE__, "foundat");
     foundatlens[i] = (size_t *) malloc(MAX_MATCHES_PER_BUFFER * sizeof(size_t));
-    checkMemoryAllocation(state, foundatlens[i], __LINE__, __FILE__,
-			  "foundatlens");
+    checkMemoryAllocation(state, foundatlens[i], __LINE__, __FILE__, "foundatlens");
     foundat[i][MAX_MATCHES_PER_BUFFER] = 0;
 
     // BUG:  NEED PROPER ERROR CODE/MESSAGE FOR MX CREATION FAILURE
@@ -2728,16 +2730,17 @@ int init_threading_model(struct scalpelState *state) {
 
     // FIX:  NEED PROPER ERROR CODE/MESSAGE FOR THREAD CREATION FAILURE
     threadargs[i].id = i;	// thread needs to read id before blocking
-    if(pthread_create
-       (&searchthreads[i], NULL, &threadedFindAll, &threadargs[i])) {
+    if(pthread_create(&searchthreads[i], NULL, &threadedFindAll, &threadargs[i])) {
       //return SCALPEL_ERROR_PTHREAD_FAILURE;
       std::string msg ("COULDN'T CREATE THREAD\n");
+
       fprintf(stderr, msg.c_str());
       throw std::runtime_error(msg);
     }
+
   }
   printf("Thread creation completed.\n");
-
+   fflush(stdout);
 #endif
 
   return 0;

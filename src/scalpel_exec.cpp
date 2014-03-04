@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 	}
 
 	fprintf(stdout, SCALPEL_BANNER_STRING);
-
+    fflush(stdout);
 	try {
 		initializeState(argv, &state);
 
@@ -138,6 +138,7 @@ int main(int argc, char **argv) {
 	} else {
 		usage();
 		fprintf(stdout, "\nERROR: No image files specified.\n\n");
+         fflush(stdout);
 	}
 
 	fprintf(stdout,
@@ -239,6 +240,7 @@ static void digAllFiles(char **argv, struct scalpelState *state) {
 			if (!inputReader) {
 				//error
 				printf("Error creating inputReader for file %s\n", inputFile);
+                 fflush(stdout);
 				return;
 			}
 			state->inReader = inputReader;
@@ -249,6 +251,7 @@ static void digAllFiles(char **argv, struct scalpelState *state) {
 				}
 				catch (std::runtime_error & e) {
 					printf("Error digging file %s\n", e.what());
+                    fflush(stdout);
 					scalpel_freeInputReaderFile(state->inReader);
 					state->inReader = NULL;
 				}
@@ -265,6 +268,7 @@ static void digAllFiles(char **argv, struct scalpelState *state) {
 					}
 					catch (std::runtime_error & e) {
 						printf("Error carving file %s\n", e.what());
+                         fflush(stdout);
 						scalpel_freeInputReaderFile(state->inReader);
 						state->inReader = NULL;
 					}

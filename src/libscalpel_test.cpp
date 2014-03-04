@@ -41,36 +41,42 @@ int main(int argc, char ** argv) {
 	options.carveWithMissingFooters = FALSE;
 	options.noSearchOverlap = FALSE;
 
-    if (libscalpel_initialize(&pScalpelState, argv[1], argv[2], options) != SCALPEL_OK)
-    {
-        printf("libscalpel initialization failed.\n");
-        exit(1);
-    }
-    
-    for (int i = 3; i < argc; ++i)
-    {
-        ScalpelInputReader * inputReader = scalpel_createInputReaderFile(argv[i]);
-        if (!inputReader) {
-            printf("Error creating inputReader for input file %s\n", argv[3]);
-            return 1;
-        }
+	try {
+		if (libscalpel_initialize(&pScalpelState, argv[1], argv[2], options) != SCALPEL_OK)
+		{
+			printf("libscalpel initialization failed.\n");
+			exit(1);
+		}
+		
+		for (int i = 3; i < argc; ++i)
+		{
+			ScalpelInputReader * inputReader = scalpel_createInputReaderFile(argv[i]);
+			if (!inputReader) {
+				printf("Error creating inputReader for input file %s\n", argv[3]);
+				return 1;
+			}
 
-        try {
-            int scalpErr = libscalpel_carve_input(pScalpelState, inputReader);
-            
-            printf("Done, libscalp result: %d\n", scalpErr);
-        }
-        catch (std::runtime_error & e) {
-            fprintf(stderr, "Error during carving: %s\n", e.what());
-        }
-        catch (...) {
-            fprintf(stderr, "Unexpected error during carving\n");
-        }
+			try {
+				int scalpErr = libscalpel_carve_input(pScalpelState, inputReader);
+				
+				printf("Done, libscalp result: %d\n", scalpErr);
+			}
+			catch (std::runtime_error & e) {
+				fprintf(stderr, "Error during carving: %s\n", e.what());
+			}
+			catch (...) {
+				fprintf(stderr, "Unexpected error during carving\n");
+			}
 
-        scalpel_freeInputReaderFile(inputReader);
-    }
+			scalpel_freeInputReaderFile(inputReader);
+		}
 
-    libscalpel_finalize(&pScalpelState);
+		libscalpel_finalize(&pScalpelState);
+	}
+	catch (...) {
+		printf("Exception thrown\n");
+		return 1;
+	}
     
 	return 0;
 }
