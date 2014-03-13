@@ -644,14 +644,14 @@ int libscalpel_carve_input(scalpelState * state, ScalpelInputReader * const read
         ss << ": Error digging file, error code: " << err;
         throw std::runtime_error(funcname + ss.str());
     }
-
+    printf ("done digging fileaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa \n");
     if ((err = carveImageFile(state))) {
         handleError(state, err); //can throw
         std::stringstream ss;
         ss << ": Error carving file, error code: " << err;
         throw std::runtime_error(funcname + ss.str());
     }
-
+    printf ("done carving file aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\n");
     return SCALPEL_OK;
 }
 
