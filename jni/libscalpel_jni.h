@@ -7,13 +7,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*
- * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver
- * Method:    carveNat
- * Signature: (Ljava/lang/String;Lorg/sleuthkit/datamodel/ReadContentInputStream;Ljava/lang/String;Ljava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat
-  (JNIEnv *, jclass, jstring, jobject, jstring, jstring);
 
 /*
  * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver

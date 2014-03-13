@@ -131,17 +131,16 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
  
 	//inputReaderVerbose = 1;
 	jniLogVerbose = 1;
-
 	//check args
 
 	if (!jConfPath) {
 		setThrowScalpelException(*env, "Missing scalpel configuration path object. ");
-		return 0;
+		return -111;
 	}
 
 	if (!jOutputDirPath) {
 		setThrowScalpelException(*env, "Missing scalpel output dir path object. ");
-		return 0;
+		return -1;
 	}
     // Set default values to Scalpelstate
 	scalpelState * pScalpelState = NULL;
@@ -164,7 +163,7 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
 	if (!confPath || !outputDirPath ) {
 		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_initialize - malloc() id ERROR converting strings\n ");
 		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_initialize - ERROR converting strings");
-		return 0;
+		return -2;
 	}
 
 	size_t len = env->GetStringUTFLength(jConfPath);
@@ -174,7 +173,7 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
 		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_initialize - ERROR converting strings");
 		env->ReleaseStringUTFChars(jConfPath, confPath);
 		env->ReleaseStringUTFChars(jOutputDirPath, outputDirPath);
-		return 0;
+		return -3;
 	}
 	strncpy(confPathS, confPath, len);
 	confPathS[len] = 0;
@@ -188,7 +187,7 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
 		env->ReleaseStringUTFChars(jOutputDirPath, outputDirPath);
 		free(confPathS);
 		confPathS = NULL;
-		return 0;
+		return -5;
 	}
 	strncpy(outputDirPathS, outputDirPath, len);
 	outputDirPathS[len] = 0;
@@ -210,15 +209,13 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
 		std::string msg = ss.str();
 		fprintf(stdout, " %s\n", msg.c_str() );
 		setThrowScalpelException(*env, msg.c_str());
-		jlong jptr = (jlong)pScalpelState; //convert ptr to long to be sent back to java
-		return jptr;
+		return -6;
 	}
 	catch (...) {
 		std::string msg ("Unexpected error during carving");
 		fprintf(stdout, "%s\n", msg.c_str());
 		setThrowScalpelException(*env, msg.c_str());
-		jlong jptr = (jlong)pScalpelState; //convert ptr to long to be sent back to java
-		return jptr;
+		return -7;
 	}
 
 	//cleanup
@@ -230,6 +227,7 @@ JNIEXPORT jlong JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_ini
 	
 	jlong jptr = (jlong)pScalpelState; //convert ptr to long to be sent back to java
     fflush(stdout);
+    if (jptr==0) return -222;
 	return jptr;
   }
   
@@ -350,187 +348,6 @@ JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_fina
 	libscalpel_finalize(&pScalpelState);
 	return;
   }
-
-  
-  /*
- * Class:     org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver
- * Method:    carveNat
- * Signature: (Ljava/lang/String;Lorg/sleuthkit/datamodel/ReadContentInputStream;Ljava/lang/String;Ljava/lang/String;)V
- */
-JNIEXPORT void JNICALL Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat
-  (JNIEnv * env, jclass callerClass, jstring jInputStreamId, jobject jInputStream, jstring jConfPath, jstring jOutputDirPath){
-
-	//inputReaderVerbose = 1;
-	jniLogVerbose = 1;
-
-	//check args
-	if (!jInputStream) {
-		setThrowScalpelException(*env, "Missing input stream object. ");
-		return;
-	}
-
-	if (! env->IsInstanceOf(jInputStream, env->FindClass(TSK_INPUTSTREAM_CLASS) ) ) {
-		setThrowScalpelException(*env, "Wrong input stream object type. ");
-		return;
-	}
-
-	if (!jConfPath) {
-		setThrowScalpelException(*env, "Missing scalpel configuration path object. ");
-		return;
-	}
-
-	if (!jOutputDirPath) {
-		setThrowScalpelException(*env, "Missing scalpel output dir path object. ");
-		return;
-	}
-
-
-	//convert strings
-	jboolean isCopyConfPath;
-	const char *confPath = env->GetStringUTFChars(jConfPath, &isCopyConfPath);
-
-	jboolean isCopyOutputDir;
-	const char *outputDirPath = env->GetStringUTFChars(jOutputDirPath, &isCopyOutputDir);
-
-	jboolean isCopyId;
-	const char * inputId = env->GetStringUTFChars(jInputStreamId, &isCopyId);
-
-	if (!confPath || !outputDirPath || !inputId) {
-		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - malloc() id ERROR converting strings\n ");
-		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR converting strings");
-		return;
-	}
-
-	size_t len = env->GetStringUTFLength(jConfPath);
-	char * confPathS = (char*) malloc(sizeof(char) * (len+1));
-	if (!confPathS) {
-		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - malloc() id ERROR converting strings\n ");
-		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR converting strings");
-		env->ReleaseStringUTFChars(jConfPath, confPath);
-		env->ReleaseStringUTFChars(jOutputDirPath, outputDirPath);
-		env->ReleaseStringUTFChars(jInputStreamId, inputId);
-		return;
-	}
-	strncpy(confPathS, confPath, len);
-	confPathS[len] = 0;
-	env->ReleaseStringUTFChars(jConfPath, confPath);
-
-	len = env->GetStringUTFLength(jOutputDirPath);
-	char * outputDirPathS = (char*) malloc(sizeof(char) * (len+1));
-	if (!outputDirPathS) {
-		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - malloc() id ERROR converting strings\n ");
-		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR converting strings");
-		env->ReleaseStringUTFChars(jOutputDirPath, outputDirPath);
-		env->ReleaseStringUTFChars(jInputStreamId, inputId);
-		free(confPathS);
-		confPathS = NULL;
-		return;
-	}
-	strncpy(outputDirPathS, outputDirPath, len);
-	outputDirPathS[len] = 0;
-	env->ReleaseStringUTFChars(jOutputDirPath, outputDirPath);
-
-	len = env->GetStringUTFLength(jInputStreamId);
-	char * inputIdS = (char*) malloc(sizeof(char) * (len+1));
-	if (!inputIdS) {
-		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - malloc() id ERROR converting strings\n ");
-		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR converting strings");
-		env->ReleaseStringUTFChars(jInputStreamId, inputId);
-		free(confPathS);
-		confPathS = NULL;
-		free(outputDirPathS);
-		outputDirPathS = NULL;
-		return;
-	}
-	strncpy(inputIdS, inputId, len);
-	inputIdS[len] = 0;
-	env->ReleaseStringUTFChars(jInputStreamId, inputId);
-
-	//end convert strings
-
-	fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat %s %s %s\n", inputIdS, confPathS, outputDirPathS);
-	//printVerbose("Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat %s %s %s\n", inputIdS, confPathS, outputDirPathS);
-
-	//setup stream wrapper
-
-	jobject jInputStreamRef = jInputStream; //env->NewGlobalRef(jInputStream);
-	if (!jInputStreamRef) {
-		fprintf(stdout, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR creating stream global ref\n ");
-		setThrowScalpelException(*env, "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat - ERROR creating stream global ref");
-
-		//cleanup
-		free(confPathS);
-		confPathS = NULL;
-		free(outputDirPathS);
-		outputDirPathS = NULL;
-		free(inputIdS);
-		inputIdS = NULL;
-
-		return;
-	}
-
-	ScalpelInputReader * tskInputStream = createInputReaderTsk(*env, inputIdS, jInputStreamRef);
-	if (! tskInputStream) {
-		setThrowScalpelException(*env, "Error creating ScalpelInputReader ");
-
-		//cleanup
-		free(confPathS);
-		confPathS = NULL;
-		free(outputDirPathS);
-		outputDirPathS = NULL;
-		free(inputIdS);
-		inputIdS = NULL;
-
-		//env->DeleteGlobalRef(jInputStreamRef);
-		return;
-	}
-
-	//call scalpel
-
-	try {
-		int scalpErr = scalpel_carveSingleInput(tskInputStream, confPathS, outputDirPathS,
-				FALSE, FALSE,
-				TRUE,
-				TRUE,  //preview mode
-			   FALSE, FALSE);
-		if (scalpErr) {
-			std::stringstream ss;
-			ss << "Error while carving, code: " << scalpErr;
-			std::string msg = ss.str();
-			fprintf(stdout, "%s\n", msg.c_str() );
-			setThrowScalpelException(*env, msg.c_str());
-		}
-
-		fprintf(stdout, "libscalpel_jni done, libscalp result: %d\n", scalpErr);
-	}
-
-	catch (std::runtime_error & e) {
-		std::stringstream ss;
-		ss << "Java_org_sleuthkit_autopsy_scalpel_jni_ScalpelCarver_carveNat Error during carving: " << e.what();
-		std::string msg = ss.str();
-		fprintf(stdout, "%s\n", msg.c_str() );
-		setThrowScalpelException(*env, msg.c_str());
-	}
-	catch (...) {
-		std::string msg ("Unexpected error during carving");
-		fprintf(stdout, "%s\n", msg.c_str());
-		setThrowScalpelException(*env, msg.c_str());
-	}
-
-	//cleanup
-	freeInputReaderTsk(*env, tskInputStream);
-
-	free(confPathS);
-	confPathS = NULL;
-	free(outputDirPathS);
-	outputDirPathS = NULL;
-	free(inputIdS);
-	inputIdS = NULL;
-
-	//env->DeleteGlobalRef(jInputStreamRef);
-    fflush(stdout);
-	return;
-}
 
 
 /********** tsk datamodel implementation of ScalpelInputReader stream ***********/
